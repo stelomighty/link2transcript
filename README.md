@@ -59,7 +59,7 @@
 | **小红书视频笔记** | ✅ 用 App 分享出来的链接 |
 | **TikTok** | ✅ 自动处理反爬，偶尔会重试一次 |
 | **抖音** | 需要 cookies，见下 |
-| X | 没测过，可以试 |
+| **X（Twitter）** | ✅ 带视频的推文 |
 
 <details>
 <summary><b>小红书链接扒不动？</b></summary>
@@ -268,7 +268,7 @@ The transcript prints into the conversation, and four files land on disk for you
 | **Xiaohongshu (RedNote)** | ✅ Use a link shared from the app |
 | **TikTok** | ✅ Anti-bot handled automatically; may retry once |
 | **Douyin** | Needs cookies — see below |
-| X | Untested; give it a try |
+| **X (Twitter)** | ✅ Tweets with video |
 
 <details>
 <summary><b>Xiaohongshu link not working?</b></summary>
