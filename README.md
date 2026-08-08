@@ -91,6 +91,8 @@
 
 **默认不开**——cookies 是隐私数据，必须你显式指定，脚本不会自作主张去读你的浏览器。
 
+另外从抖音「精选」页复制出来的链接是 `douyin.com/jingxuan?modal_id=<id>` 这种形式，yt-dlp 不认。脚本会自动把它归一成 `douyin.com/video/<id>`，你直接粘原链接就行。
+
 </details>
 
 ## 快到什么程度
@@ -299,6 +301,8 @@ Douyin sits behind a cookie wall, so you have to supply them:
 ```
 
 **Off by default** — cookies are private data, so the script never reaches into your browser unless you explicitly ask.
+
+Also, links copied from Douyin's 精选 feed come in the form `douyin.com/jingxuan?modal_id=<id>`, which yt-dlp doesn't recognise. The script normalises those to `douyin.com/video/<id>` for you — just paste the original.
 
 </details>
 

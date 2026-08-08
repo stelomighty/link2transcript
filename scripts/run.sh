@@ -87,6 +87,13 @@ command -v whisper-cli >/dev/null || die "缺 whisper-cli：brew install whisper
 [[ -f "$MODEL" ]] || die "缺模型 $MODEL
 下载：curl -L --create-dirs -o '$MODEL' https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$(basename "$MODEL")"
 
+# 抖音「精选」页复制出来的是 douyin.com/jingxuan?modal_id=<id>，yt-dlp 不认这种形式
+# （直接报 Unsupported URL）。归一成 /video/<id> 再交给它——2026-08-08 实测。
+if [[ "$INPUT" =~ douyin\.com/.*[?\&]modal_id=([0-9]+) ]]; then
+  INPUT="https://www.douyin.com/video/${BASH_REMATCH[1]}"
+  echo "ℹ️  抖音链接已归一为 $INPUT"
+fi
+
 IS_URL=0
 [[ "$INPUT" =~ ^https?:// ]] && IS_URL=1
 if [[ $IS_URL -eq 1 ]]; then
