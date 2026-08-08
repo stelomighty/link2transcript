@@ -58,7 +58,7 @@
 | **本地视频音频文件** | ✅ mp4 / mov / mp3 / m4a / aiff 等 |
 | **小红书视频笔记** | ✅ 用 App 分享出来的链接 |
 | **TikTok** | ✅ 自动处理反爬，偶尔会重试一次 |
-| **抖音** | 需要 cookies，见下 |
+| **抖音** | ✅ 需自备 cookies，见下 |
 | **X（Twitter）** | ✅ 带视频的推文 |
 
 <details>
@@ -91,7 +91,13 @@
 
 **默认不开**——cookies 是隐私数据，必须你显式指定，脚本不会自作主张去读你的浏览器。
 
-另外从抖音「精选」页复制出来的链接是 `douyin.com/jingxuan?modal_id=<id>` 这种形式，yt-dlp 不认。脚本会自动把它归一成 `douyin.com/video/<id>`，你直接粘原链接就行。
+**加了还是报同样的错？多半是 Chrome 配置文件选错了。** Chrome 常有多个 profile，而 `--cookies-from-browser chrome` 默认只读 `Default`——很多人日常用的其实是 Profile 1/2/3。指定一下就好：
+
+```bash
+--cookies-from-browser "chrome:Profile 2"
+```
+
+另外从抖音「精选」页复制出来的链接是 `douyin.com/jingxuan?modal_id=<id>` 这种形式，yt-dlp 不认。脚本会自动归一成 `douyin.com/video/<id>`，你直接粘原链接就行。
 
 </details>
 
@@ -269,7 +275,7 @@ The transcript prints into the conversation, and four files land on disk for you
 | **Local audio & video files** | ✅ mp4 / mov / mp3 / m4a / aiff, etc. |
 | **Xiaohongshu (RedNote)** | ✅ Use a link shared from the app |
 | **TikTok** | ✅ Anti-bot handled automatically; may retry once |
-| **Douyin** | Needs cookies — see below |
+| **Douyin** | ✅ Needs your own cookies — see below |
 | **X (Twitter)** | ✅ Tweets with video |
 
 <details>
@@ -301,6 +307,12 @@ Douyin sits behind a cookie wall, so you have to supply them:
 ```
 
 **Off by default** — cookies are private data, so the script never reaches into your browser unless you explicitly ask.
+
+**Still the same error after adding that?** You're probably pointing at the wrong Chrome profile. Chrome usually has several, and `--cookies-from-browser chrome` only reads `Default` — which may not be the one you actually use. Name it explicitly:
+
+```bash
+--cookies-from-browser "chrome:Profile 2"
+```
 
 Also, links copied from Douyin's 精选 feed come in the form `douyin.com/jingxuan?modal_id=<id>`, which yt-dlp doesn't recognise. The script normalises those to `douyin.com/video/<id>` for you — just paste the original.
 

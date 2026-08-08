@@ -1,6 +1,6 @@
 ---
 name: link2transcript
-description: 顺风耳——把任何视频/音频变成文字稿。丢一个链接（YouTube、B站、小红书、X、TikTok、播客实测可用；抖音要自备 cookies）或本地文件进来，出干净的可读文字稿 + 带时间戳版 + 作者/播放/点赞等元数据。适用于「扒一下这个视频的文案」「这条链接讲了什么」「把这个视频转成文字」「拆解一下这个爆款」「这期播客的文字稿」。纯字卡/无口播/关键信息只在画面里的视频加 --frames 抽帧看画面。全本地跑，不依赖豆包/千问等任何厂商的开关。
+description: 顺风耳——把任何视频/音频变成文字稿。丢一个链接（YouTube、B站、小红书、X、TikTok、抖音、播客全部实测可用；抖音需自备 cookies）或本地文件进来，出干净的可读文字稿 + 带时间戳版 + 作者/播放/点赞等元数据。适用于「扒一下这个视频的文案」「这条链接讲了什么」「把这个视频转成文字」「拆解一下这个爆款」「这期播客的文字稿」。纯字卡/无口播/关键信息只在画面里的视频加 --frames 抽帧看画面。全本地跑，不依赖豆包/千问等任何厂商的开关。
 ---
 
 # link2transcript（顺风耳）
@@ -168,7 +168,8 @@ done
 - **平台可靠性分三档，别一概说"支持"**（2026-08-08 实测）：
   - **稳**：YouTube、B站、**小红书视频笔记**、本地文件。小红书连跑 3 次全过、每次都是 106 字、零重试——**它和 YouTube 同档，「链接有讲究」是使用约束不是稳定性问题**，两件事别混在一格里说。
   - **TikTok：能用，但靠两件事撑着**。① 脚本给所有 yt-dlp 调用挂了浏览器 UA（`$UA`，可用 env `TRANSCRIPT_UA` 覆盖）——不挂就报 `Unable to extract universal data for rehydration`，TikTok 认得出 yt-dlp 的默认身份，会发一个不含视频数据的空壳页。② 失败后 8 秒 / 20 秒两级重试——TikTok 的 JS 挑战让成功带随机性，**同一条链接交替成功失败，跟加不加 `--download-sections` 无关**（这点最初误判过）。加上这两条后连跑 3 次全过（其中 1 次触发重试）。
-  - **抖音：要 cookies，默认扒不动**。2026-08-08 实测两条公开链接都报 `Fresh cookies (not necessarily logged in) are needed`——这是 cookie 墙，不是链接失效。用户加 `--cookies-from-browser chrome`（或 `--cookies 文件`）才可能通。**这条路我没拿真 cookies 验过，只验了参数确实传到了 yt-dlp**，别拍胸脯说抖音能用。
+  - **抖音：加 cookies 就能用**（2026-08-08 实测端到端跑通，2:06 视频完整转出，元数据齐全）。两个坑：① 不给 cookies 必报 `Fresh cookies (not necessarily logged in) are needed`；② **`--cookies-from-browser chrome` 默认只读 `Default` 配置**，而很多人日常用的是 Profile 1/2/3——实测本机 Default 库停在四个月前、抖音 cookie 在 Profile 2，得写成 `--cookies-from-browser "chrome:Profile 2"`。排查法：逐个 profile 导出 cookie 数一下 douyin 条数。
+  - 另外抖音「精选」页复制的链接是 `douyin.com/jingxuan?modal_id=<id>`，yt-dlp 报 `Unsupported URL`；脚本会自动归一成 `/video/<id>`。
   - **X（Twitter）：稳**。2026-08-08 实测带视频的推文，119s 视频完整转出，连跑 3 次全过、零重试，元数据给得全（作者/平台/时长/发布/播放）。
   - **小红书的链接必须是 App 分享出来的、带 `xsec_token` 的那种**，桌面浏览器地址栏直接复制的链接没有这个参数，会扒不动。token 还会过期，隔一阵子要重新分享一次。
   - **小红书图文笔记**（`type` 不是 video）本身没有视频流，报 `No video formats found` 是正常结果不是坏了；换成视频笔记就能跑。

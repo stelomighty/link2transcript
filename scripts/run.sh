@@ -243,7 +243,10 @@ if [[ $GOT_SUB -eq 0 ]]; then
       || { echo "  ⚠️  第二次也没成，再隔 20 秒最后试一次…"; sleep 20;
            "$YTDLP" "${YTA[@]}" --no-warnings -f "bestaudio/best" -x --audio-format mp3 \
              -o "$OUTDIR/media.%(ext)s" "$INPUT" >/dev/null \
-           || die "yt-dlp 扒不下来（可能需要登录、站点反爬，或该站点不支持）"; }
+           || die "yt-dlp 扒不下来（可能需要登录、站点反爬，或该站点不支持）
+   抖音等站点要 cookies：加 --cookies-from-browser chrome
+   已经加了还报 cookie 错？多半是配置文件选错了——Chrome 常有多个 profile，
+   而默认只读 Default。指定一下：--cookies-from-browser \"chrome:Profile 2\""; }
     fi
     MEDIA="$OUTDIR/media.mp3"
   fi
