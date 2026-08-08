@@ -52,14 +52,16 @@
 
 ## 支持哪些平台
 
-| 平台 | |
-|---|---|
-| **YouTube / B站 / 播客** | ✅ |
-| **本地视频音频文件** | ✅ mp4 / mov / mp3 / m4a / aiff 等 |
-| **小红书视频笔记** | ✅ 用 App 分享出来的链接 |
-| **TikTok** | ✅ 自动处理反爬，偶尔会重试一次 |
-| **抖音** | ✅ 需自备 cookies，见下 |
-| **X（Twitter）** | ✅ 带视频的推文 |
+全部实测跑通过。**有附加条件的三个，条件写在下面这一列——动手前先看一眼，省得白试。**
+
+| 平台 | | 附加条件 |
+|---|---|---|
+| **YouTube / B站 / 播客** | ✅ | 无 |
+| **本地视频音频文件** | ✅ | 无。mp4 / mov / mp3 / m4a / aiff 等 |
+| **X（Twitter）** | ✅ | 推文里得有视频 |
+| **TikTok** | ✅ | 无。偶尔会自动重试一次，等它跑完就行 |
+| **小红书** | ✅ | ① 视频笔记，图文笔记没有音轨<br>② 链接要**从 App 分享**（带 `xsec_token`），桌面地址栏复制的不行 |
+| **抖音** | ✅ | ① 要**你自己提供 cookies**<br>② 还得指定对 Chrome 配置文件，默认那个多半不对 |
 
 <details>
 <summary><b>小红书链接扒不动？</b></summary>
@@ -91,11 +93,15 @@
 
 **默认不开**——cookies 是隐私数据，必须你显式指定，脚本不会自作主张去读你的浏览器。
 
-**加了还是报同样的错？多半是 Chrome 配置文件选错了。** Chrome 常有多个 profile，而 `--cookies-from-browser chrome` 默认只读 `Default`——很多人日常用的其实是 Profile 1/2/3。指定一下就好：
+**加了还是报同样的错？多半是 Chrome 配置文件选错了。** Chrome 常有多个 profile，而 `--cookies-from-browser chrome` 只读 `Default` 那个——很多人日常用的其实是 Profile 1/2/3，Default 可能几个月没动过了。
+
+查自己是哪个：Chrome 地址栏输 `chrome://version`，看「个人资料路径 / Profile Path」那行，末尾就是配置文件名。然后：
 
 ```bash
 --cookies-from-browser "chrome:Profile 2"
 ```
+
+还有一点：**抖音的 cookie 得是那个 profile 真的访问过 douyin.com 才有**（不用登录）。无痕窗口不算，它的 cookie 不落盘。
 
 另外从抖音「精选」页复制出来的链接是 `douyin.com/jingxuan?modal_id=<id>` 这种形式，yt-dlp 不认。脚本会自动归一成 `douyin.com/video/<id>`，你直接粘原链接就行。
 
@@ -269,14 +275,16 @@ The transcript prints into the conversation, and four files land on disk for you
 
 ## Supported platforms
 
-| Platform | |
-|---|---|
-| **YouTube / Bilibili / podcasts** | ✅ |
-| **Local audio & video files** | ✅ mp4 / mov / mp3 / m4a / aiff, etc. |
-| **Xiaohongshu (RedNote)** | ✅ Use a link shared from the app |
-| **TikTok** | ✅ Anti-bot handled automatically; may retry once |
-| **Douyin** | ✅ Needs your own cookies — see below |
-| **X (Twitter)** | ✅ Tweets with video |
+All verified end-to-end. **Three of them have prerequisites — they're spelled out in the last column, so check before you try.**
+
+| Platform | | Prerequisites |
+|---|---|---|
+| **YouTube / Bilibili / podcasts** | ✅ | None |
+| **Local audio & video files** | ✅ | None. mp4 / mov / mp3 / m4a / aiff, etc. |
+| **X (Twitter)** | ✅ | The tweet has to contain a video |
+| **TikTok** | ✅ | None. It may auto-retry once — just let it finish |
+| **Xiaohongshu (RedNote)** | ✅ | ① Video posts only — image posts have no audio track<br>② The link must be **shared from the app** (carries `xsec_token`); a desktop URL won't work |
+| **Douyin** | ✅ | ① You have to **supply cookies** yourself<br>② And point at the right Chrome profile — the default one usually isn't it |
 
 <details>
 <summary><b>Xiaohongshu link not working?</b></summary>
@@ -308,11 +316,15 @@ Douyin sits behind a cookie wall, so you have to supply them:
 
 **Off by default** — cookies are private data, so the script never reaches into your browser unless you explicitly ask.
 
-**Still the same error after adding that?** You're probably pointing at the wrong Chrome profile. Chrome usually has several, and `--cookies-from-browser chrome` only reads `Default` — which may not be the one you actually use. Name it explicitly:
+**Still the same error after adding that?** You're probably pointing at the wrong Chrome profile. Chrome usually has several, and `--cookies-from-browser chrome` only reads `Default` — which may be months stale if you actually live in Profile 1/2/3.
+
+To find yours: type `chrome://version` in the address bar and look at "Profile Path" — the last path segment is the profile name. Then:
 
 ```bash
 --cookies-from-browser "chrome:Profile 2"
 ```
+
+One more thing: the Douyin cookies only exist if **that profile has actually visited douyin.com** (no login needed). Incognito windows don't count — their cookies never hit disk.
 
 Also, links copied from Douyin's 精选 feed come in the form `douyin.com/jingxuan?modal_id=<id>`, which yt-dlp doesn't recognise. The script normalises those to `douyin.com/video/<id>` for you — just paste the original.
 
