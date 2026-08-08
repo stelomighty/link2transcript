@@ -2,7 +2,7 @@
 
 **中文** ｜ [English](#english)
 
-**丢一个视频链接进去，出一份文字稿。** 就这一件事，做干净。
+**丢一个视频链接进去，出一份文字稿。**
 
 全本地跑，免费，不限次数，**一个 API key 都不需要**。
 
@@ -10,7 +10,7 @@
 
 ## 怎么装：复制下面这段话，粘给你的 AI
 
-**你不用开终端，也不用懂下面提到的任何工具是什么。** Claude Code、Codex 都认这一段：
+**不用开终端，也不用懂下面提到的任何工具是什么。** Claude Code、Codex 都认这一段：
 
 ```text
 帮我装 link2transcript 这个 skill：
@@ -113,7 +113,7 @@
 
 本地转录实测约 **10 倍实时**（49 秒音频跑 4.9 秒，196 秒音频跑 19.9 秒，Apple Silicon）。**10 分钟的播客约 1 分钟出稿。**
 
-## 三个别人不会告诉你的坑
+## 三个小坑
 
 **转录模型只有耳朵，没有眼睛。** 纯字卡视频、没有口播的演示，转出来是空的——不是工具坏了，是那条视频压根没人说话。这种加 `--frames`，它会均匀抽帧存下来，文件名自带原片时间，让 AI 直接读图。
 
@@ -222,7 +222,7 @@ MIT
 
 [中文](#link2transcript顺风耳) ｜ **English**
 
-**Drop in a video link, get back a transcript.** That's the whole job, done properly.
+**Drop in a video link, get back a transcript.**
 
 Runs entirely on your machine. Free, unlimited, and **it needs no API key of any kind**.
 
