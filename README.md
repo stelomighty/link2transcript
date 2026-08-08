@@ -1,5 +1,7 @@
 # link2transcript（顺风耳）
 
+**中文** ｜ [English](#english)
+
 **丢一个视频链接进去，出一份文字稿。** 就这一件事，做干净。
 
 全本地跑，免费，不限次数，**一个 API key 都不需要**。
@@ -166,6 +168,178 @@ UA 哪天被平台识破的话，装 `curl_cffi` 后可以用 yt-dlp 的 `--impe
 ## 关于支持
 
 **按现状提供。** 我不接 issue 也不接 PR，但代码你随便改、随便 fork。
+
+## License
+
+MIT
+
+---
+
+<a name="english"></a>
+
+# link2transcript (English)
+
+[中文](#link2transcript顺风耳) ｜ **English**
+
+**Drop in a video link, get back a transcript.** That's the whole job, done properly.
+
+Runs entirely on your machine. Free, unlimited, and **it needs no API key of any kind**.
+
+---
+
+## Install: copy the block below and paste it to your AI
+
+**You don't need a terminal, and you don't need to know what any of the tools below are.** Both Claude Code and Codex understand this:
+
+```text
+Please install the link2transcript skill for me:
+1. Install stelomighty/link2transcript from GitHub
+2. Read its README.md and follow the "Manual install" section to set up the three
+   dependencies and the model
+3. Pull the model from the hf-mirror.com URL (reachable worldwide); fall back to the
+   official one if that stalls
+4. When you're done, run it once on any video link and confirm you get a transcript
+```
+
+It will ask before running each command — just approve. **Five to ten minutes total**, almost all of it spent downloading the 547MB model.
+
+> **Codex users**: restart Codex after installing so it picks up the new skill.
+
+## Use it: just say what you want
+
+Once installed you **never have to remember a command**. Talk to your AI:
+
+```text
+Turn this video into text: https://...
+What's in this link?
+Just the first 30 seconds — I want to see how the hook works
+This video has no narration, look at what's written on screen
+```
+
+The transcript **appears right in the conversation**. You don't have to go hunting for files.
+
+## What you get
+
+The transcript prints into the conversation, and four files land on disk for your records — by default under `~/transcripts/<MMDD-HHMMSS>/` (a fresh folder per run, nothing overwrites):
+
+| File | Looks like | When you want it |
+|---|---|---|
+| `transcript.txt` | `All right, so here we are, in front of the elephants` | The everyday one — plain text, split at natural pauses |
+| `transcript-timed.md` | `` `00:01`  All right, so here we are... `` | Locating a line back in the original |
+| `transcript.srt` | `00:00:01,200 --> 00:00:03,360` + text | Burning subtitles |
+| `info.md` | Title / uploader / duration / views / likes / description | When you need the metadata |
+
+(There's also a `meta.json` with raw metadata — that one's for machines, ignore it.)
+
+## Platform status (all tested, not guessed)
+
+| Platform | Status | Notes |
+|---|---|---|
+| **YouTube / Bilibili / podcasts** | ✅ Solid | End-to-end verified |
+| **Local audio & video files** | ✅ Solid | mp4 / mov / mp3 / m4a / aiff, etc. |
+| **Xiaohongshu (RedNote)** | ✅ Works | **The link matters** — see below |
+| **TikTok** | ✅ Works | Held together by UA spoofing + auto-retry — see below |
+| Douyin / X | ❓ Untested | `yt-dlp` has extractors; give it a try |
+
+**Xiaohongshu**: the link has to be the one **shared from the app**, carrying an `xsec_token` parameter. A URL copied from the desktop address bar lacks it and won't work, and the token expires, so you'll need a fresh share now and then. Also, Xiaohongshu only exposes title and duration — uploader, views and likes come back empty. That's the platform withholding them, not a bug. Image posts (as opposed to video posts) have no video stream at all, so `No video formats found` is the correct answer there.
+
+**TikTok**: every request carries a browser User-Agent. Without it TikTok recognises the downloader and serves a shell page with no video data. On top of that its JS challenge makes success probabilistic, so a failure triggers retries after 8 and 20 seconds — **seeing "retrying in 8 seconds" is normal, not a fault**.
+
+## How fast
+
+It asks the platform for existing captions first. If it gets them, you're done in seconds and the local model never starts. Only when there are none does it pull the audio and transcribe.
+
+Local transcription measures at roughly **10× realtime** (49s of audio in 4.9s; 196s in 19.9s, Apple Silicon). **A 10-minute podcast takes about a minute.**
+
+## Three things nobody warns you about
+
+**The model has ears, not eyes.** Text-card videos and silent screencasts come back empty — that isn't a failure, it's a video with nobody speaking. Add `--frames` and it samples evenly spaced stills whose filenames carry the source timestamp, so your AI can read the screen instead.
+
+**On pure background noise the model invents content.** An empty result is obvious; a fabricated sentence isn't. So anything under 30 characters raises a warning — when you see it, treat the run as having captured nothing.
+
+**Proper nouns will almost always come out wrong.** Two defences: `--hint` feeds domain vocabulary to the model up front (biasing decoding), and `--terms` applies a `wrong=>right` list afterwards (**every substitution is printed — nothing is changed behind your back**). In one measured technical sentence, 5 of 6 terms were wrong; the two together recovered all of them.
+
+## If huggingface.co is blocked where you are
+
+Use `hf-mirror.com` instead — verified to serve the byte-identical file (574,041,195 bytes) and reachable worldwide. Both URLs are in the manual install section below.
+
+If YouTube itself is blocked for you, that route needs a proxy; Bilibili, Xiaohongshu, podcasts and local files are unaffected.
+
+---
+
+# For people who'd rather do it by hand
+
+The paste-to-your-AI block above is all most people need. What follows is for manual installation, or for using this as a plain command-line tool.
+
+## Manual install
+
+Three free dependencies, one command:
+
+```bash
+brew install yt-dlp ffmpeg whisper-cpp
+```
+
+Then the model (547MB — **get the turbo build**, not the 3GB full one; you don't need that precision for everyday transcription):
+
+```bash
+curl -L --create-dirs -o ~/.cache/whisper.cpp/ggml-large-v3-turbo-q5_0.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin
+```
+
+Mirror (identical file, reachable worldwide):
+
+```bash
+curl -L --create-dirs -o ~/.cache/whisper.cpp/ggml-large-v3-turbo-q5_0.bin \
+  https://hf-mirror.com/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin
+```
+
+Then drop the repo into your AI tool's skills directory:
+
+```bash
+# Claude Code
+git clone https://github.com/stelomighty/link2transcript.git ~/.claude/skills/link2transcript
+
+# Codex (its own installer; --name is required — without it you get "Invalid skill name")
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo stelomighty/link2transcript --path . --name link2transcript
+```
+
+You don't have to use it as a skill at all — clone it anywhere and run `scripts/run.sh` as an ordinary CLI tool.
+
+## Running it directly
+
+```bash
+bash scripts/run.sh "<url or local file>" --lang en
+```
+
+| Flag | What it does |
+|---|---|
+| `--lang zh\|en\|auto` | Spoken language. Set it explicitly when you know it — accuracy improves |
+| `--out DIR` | Output directory (default `~/transcripts/<MMDD-HHMMSS>/`) |
+| `--head N` | Only process the first N seconds |
+| `--frames` | Sample stills so the screen can be read (off by default) |
+| `--force-asr` | Skip platform captions and transcribe from scratch |
+| `--hint "terms"` | Domain vocabulary fed to the model during transcription; keep it under 30 words |
+| `--terms FILE` | Apply a `wrong=>right` correction list before writing the transcript |
+| `--keep-media` | Keep the downloaded audio (deleted by default to save space) |
+
+Full flags, implementation notes, and the rules your AI should follow are in [SKILL.md](SKILL.md) and [AGENTS.md](AGENTS.md).
+
+## Which AI tools are supported
+
+`SKILL.md` (read by Claude Code and Codex) and `AGENTS.md` (read by Codex, Cursor, Aider, Cline and friends) both sit at the repo root and describe the same command contract. `$SKILL` throughout the docs means wherever this skill got installed:
+
+| Tool | `$SKILL` is |
+|---|---|
+| Claude Code | `~/.claude/skills/link2transcript/` |
+| Codex | `~/.codex/skills/link2transcript/` |
+| Anything else / direct use | the repo root |
+
+If the User-Agent ever stops fooling a platform, installing `curl_cffi` unlocks yt-dlp's `--impersonate` for full browser fingerprint spoofing; you can also override the UA with the `TRANSCRIPT_UA` environment variable.
+
+## Support
+
+**Provided as is.** I don't take issues or pull requests — but the code is yours to change and fork freely.
 
 ## License
 
