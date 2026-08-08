@@ -5,6 +5,7 @@
 #                         [--frames] [--max-frames N] [--frame-width 1024]
 #                         [--start mm:ss] [--end mm:ss]
 #                         [--hint "领域词"] [--terms 词表] [--no-terms]
+#                         [--cookies-from-browser chrome|safari|firefox] [--cookies 文件]
 #
 # 两条路：
 #   快路 — 平台自带字幕（YouTube/B站常有），秒取，不动 GPU
@@ -26,6 +27,9 @@ YTDLP="$(command -v yt-dlp || echo "$HOME/.local/bin/yt-dlp")"
 # universal data for rehydration"）。换成浏览器 UA 即可拿到正常页面——2026-08-08 实测。
 UA="${TRANSCRIPT_UA:-Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36}"
 YTA=(--user-agent "$UA")
+# 抖音等站点光有 UA 不够，还要 cookies（实测报 "Fresh cookies (not necessarily logged in)
+# are needed"）。默认不碰浏览器 cookies——那是隐私数据，必须用户显式开。
+COOKIES_FROM=""; COOKIES_FILE=""
 MODEL="${WHISPER_MODEL:-$HOME/.cache/whisper.cpp/ggml-large-v3-turbo-q5_0.bin}"
 
 INPUT=""; LANG_OPT="auto"; OUTDIR=""; KEEP=0; FORCE_ASR=0; HEAD=0
@@ -46,6 +50,8 @@ while [[ $# -gt 0 ]]; do
     --hint) HINT="$2"; shift 2 ;;
     --terms) TERMS+=("$2"); shift 2 ;;
     --no-terms) NO_TERMS=1; shift ;;
+    --cookies-from-browser) COOKIES_FROM="$2"; shift 2 ;;
+    --cookies) COOKIES_FILE="$2"; shift 2 ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) INPUT="$1"; shift ;;
   esac
@@ -57,6 +63,10 @@ if [[ $FRAMES -eq 0 && -n "${START}${END}" ]]; then
 fi
 
 die() { echo "❌ $*" >&2; exit 1; }
+
+# cookies 在参数解析之后才有值，这里再挂进 yt-dlp 参数组
+[[ -n "$COOKIES_FROM" ]] && YTA+=(--cookies-from-browser "$COOKIES_FROM")
+[[ -n "$COOKIES_FILE" ]] && YTA+=(--cookies "$COOKIES_FILE")
 
 # ── 词表：默认表（中文任务）+ --terms 追加 ────────────────
 # --terms 可以给路径，也可以给 terms/ 下的短名（--terms medical → terms/medical.txt）

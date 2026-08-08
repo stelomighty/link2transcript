@@ -52,13 +52,14 @@
 
 ## 各平台实测情况
 
-| 平台 | 状态 | 备注 |
+| 平台 | 状态 | 实测情况 |
 |---|---|---|
-| **YouTube / B站 / 播客** | ✅ 稳 | 端到端跑通 |
+| **YouTube / B站 / 播客** | ✅ 稳 | 多次端到端跑通，零重试 |
 | **本地视频音频文件** | ✅ 稳 | mp4 / mov / mp3 / m4a / aiff 等 |
-| **小红书** | ✅ 能用 | **链接有讲究**，见下 |
-| **TikTok** | ✅ 能用 | 靠 UA 伪装 + 自动重试撑着，见下 |
-| 抖音 / X | ❓ 没实测 | `yt-dlp` 有提取器，可以试 |
+| **小红书视频笔记** | ✅ 稳 | 连跑 3 次全过、零重试。**但链接有讲究**，见下 |
+| **TikTok** | ⚠️ 能用，会重试 | 连跑 3 次全过，其中 1 次触发重试。靠 UA 伪装撑着，见下 |
+| **抖音** | ⚠️ 要自己传 cookies | 两条公开链接都报 `Fresh cookies... are needed`。加 `--cookies-from-browser chrome` 才可能通，**这条路我没拿真 cookies 验过** |
+| X | ❓ 完全没测 | 没拿到样本 |
 
 **小红书**：链接必须是**从 App 分享出来的**、带 `xsec_token` 参数的那种。桌面浏览器地址栏直接复制的没有这个参数，扒不动，而且 token 会过期，隔一阵子要重新分享一次。另外小红书只给标题和时长，作者/播放/点赞都是空的——这是平台没给，不是工具坏了。图文笔记（不是视频）本身没有视频流，报 `No video formats found` 是正常结果。
 
@@ -150,6 +151,8 @@ bash scripts/run.sh "<链接或本地文件>" --lang zh
 | `--hint "领域词"` | 转录时喂给模型的领域词，30 词以内 |
 | `--terms 词表` | 出稿前按 `错=>对` 词表纠错 |
 | `--keep-media` | 保留下载的音频（默认删掉省空间） |
+| `--cookies-from-browser 浏览器` | 从浏览器取 cookies（抖音等站点需要）。**默认不开**——cookies 是隐私数据，必须你显式指定 |
+| `--cookies 文件` | 用 Netscape 格式的 cookies 文件，不碰浏览器 |
 
 完整参数、实现细节、以及给 AI 看的使用规则见 [SKILL.md](SKILL.md) 和 [AGENTS.md](AGENTS.md)。
 
@@ -234,13 +237,14 @@ The transcript prints into the conversation, and four files land on disk for you
 
 ## Platform status (all tested, not guessed)
 
-| Platform | Status | Notes |
+| Platform | Status | What was measured |
 |---|---|---|
-| **YouTube / Bilibili / podcasts** | ✅ Solid | End-to-end verified |
+| **YouTube / Bilibili / podcasts** | ✅ Solid | Verified end-to-end repeatedly, no retries |
 | **Local audio & video files** | ✅ Solid | mp4 / mov / mp3 / m4a / aiff, etc. |
-| **Xiaohongshu (RedNote)** | ✅ Works | **The link matters** — see below |
-| **TikTok** | ✅ Works | Held together by UA spoofing + auto-retry — see below |
-| Douyin / X | ❓ Untested | `yt-dlp` has extractors; give it a try |
+| **Xiaohongshu (RedNote)** | ✅ Solid | 3 consecutive runs, all passed, no retries. **But the link matters** — see below |
+| **TikTok** | ⚠️ Works, retries | 3 consecutive runs, all passed, one needed a retry. Held together by UA spoofing — see below |
+| **Douyin** | ⚠️ Needs your cookies | Two public links both returned `Fresh cookies... are needed`. Pass `--cookies-from-browser chrome` to get past it — **I have not verified that path with real cookies** |
+| X | ❓ Untested | No sample to test with |
 
 **Xiaohongshu**: the link has to be the one **shared from the app**, carrying an `xsec_token` parameter. A URL copied from the desktop address bar lacks it and won't work, and the token expires, so you'll need a fresh share now and then. Also, Xiaohongshu only exposes title and duration — uploader, views and likes come back empty. That's the platform withholding them, not a bug. Image posts (as opposed to video posts) have no video stream at all, so `No video formats found` is the correct answer there.
 
@@ -323,6 +327,8 @@ bash scripts/run.sh "<url or local file>" --lang en
 | `--hint "terms"` | Domain vocabulary fed to the model during transcription; keep it under 30 words |
 | `--terms FILE` | Apply a `wrong=>right` correction list before writing the transcript |
 | `--keep-media` | Keep the downloaded audio (deleted by default to save space) |
+| `--cookies-from-browser BROWSER` | Pull cookies from your browser (Douyin and similar need them). **Off by default** — cookies are private data, you have to ask for this explicitly |
+| `--cookies FILE` | Use a Netscape-format cookie file instead of touching the browser |
 
 Full flags, implementation notes, and the rules your AI should follow are in [SKILL.md](SKILL.md) and [AGENTS.md](AGENTS.md).
 
