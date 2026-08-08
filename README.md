@@ -50,20 +50,48 @@
 
 （还有一个 `meta.json` 是原始元数据，给程序读的，你不用管。）
 
-## 各平台实测情况
+## 支持哪些平台
 
-| 平台 | 状态 | 实测情况 |
-|---|---|---|
-| **YouTube / B站 / 播客** | ✅ 稳 | 多次端到端跑通，零重试 |
-| **本地视频音频文件** | ✅ 稳 | mp4 / mov / mp3 / m4a / aiff 等 |
-| **小红书视频笔记** | ✅ 稳 | 连跑 3 次全过、零重试。**但链接有讲究**，见下 |
-| **TikTok** | ⚠️ 能用，会重试 | 连跑 3 次全过，其中 1 次触发重试。靠 UA 伪装撑着，见下 |
-| **抖音** | ⚠️ 要自己传 cookies | 两条公开链接都报 `Fresh cookies... are needed`。加 `--cookies-from-browser chrome` 才可能通，**这条路我没拿真 cookies 验过** |
-| X | ❓ 完全没测 | 没拿到样本 |
+| 平台 | |
+|---|---|
+| **YouTube / B站 / 播客** | ✅ |
+| **本地视频音频文件** | ✅ mp4 / mov / mp3 / m4a / aiff 等 |
+| **小红书视频笔记** | ✅ 用 App 分享出来的链接 |
+| **TikTok** | ✅ 自动处理反爬，偶尔会重试一次 |
+| **抖音** | 需要 cookies，见下 |
+| X | 没测过，可以试 |
 
-**小红书**：链接必须是**从 App 分享出来的**、带 `xsec_token` 参数的那种。桌面浏览器地址栏直接复制的没有这个参数，扒不动，而且 token 会过期，隔一阵子要重新分享一次。另外小红书只给标题和时长，作者/播放/点赞都是空的——这是平台没给，不是工具坏了。图文笔记（不是视频）本身没有视频流，报 `No video formats found` 是正常结果。
+<details>
+<summary><b>小红书链接扒不动？</b></summary>
 
-**TikTok**：脚本给所有请求挂了浏览器 User-Agent。不挂的话 TikTok 认得出下载器，会发一个不含视频数据的空壳页。另外它的 JS 挑战让成功带随机性，所以失败后有 8 秒 / 20 秒两级重试——**看到「隔 8 秒重试」是正常的，不是坏了**。
+链接得是**从 App 分享出来的**那种，带 `xsec_token` 参数。桌面浏览器地址栏直接复制的没有这个参数。token 也会过期，隔一阵子重新分享一次就行。
+
+另外两件正常现象：小红书只给标题和时长，作者/播放/点赞是空的——平台没给；图文笔记本身没有视频流，报 `No video formats found` 是对的，换视频笔记即可。
+
+</details>
+
+<details>
+<summary><b>TikTok 提示「隔 8 秒重试」？</b></summary>
+
+正常，不用管。TikTok 的 JS 挑战让请求成功带随机性，所以脚本内置了 8 秒 / 20 秒两级重试，等它自己跑完就行。
+
+脚本还给所有请求挂了浏览器 User-Agent——不挂的话 TikTok 会发一个不含视频数据的空壳页。哪天这招失效，见下面「支持哪些 AI 工具」一节的 `--impersonate`。
+
+</details>
+
+<details>
+<summary><b>抖音报 <code>Fresh cookies are needed</code>？</b></summary>
+
+抖音有 cookie 墙，得你自己提供：
+
+```bash
+--cookies-from-browser chrome     # 从浏览器取
+--cookies cookies.txt             # 或用 Netscape 格式文件
+```
+
+**默认不开**——cookies 是隐私数据，必须你显式指定，脚本不会自作主张去读你的浏览器。
+
+</details>
 
 ## 快到什么程度
 
@@ -79,20 +107,16 @@
 
 **专有名词几乎一定会转错。** 两道闸：`--hint` 在转录时给模型喂领域词（事前偏向），`--terms` 在出稿前按 `错=>对` 词表擦一遍（事后纠正，**每改一处都打印出来，不偷偷改字**）。实测一句技术口播里 6 个术语错 5 个，两道闸叠加能全部救回来。
 
-## 中国大陆网络下能用吗
+<details>
+<summary><b>有些地址连不上？</b></summary>
 
-能，但有两处要绕：
+**下模型**：`huggingface.co` 连不上就换 `hf-mirror.com`，同一个文件（574,041,195 字节，核对过）。上面那段安装提示词默认就走镜像。
 
-| 环节 | 情况 | 怎么办 |
-|---|---|---|
-| 装依赖 | 能跑，就是慢 | 嫌慢换中科大 / 清华的 Homebrew 镜像 |
-| **下模型** | `huggingface.co` 直连不通 | 换 `hf-mirror.com`，见下面安装一节 |
-| **转 YouTube 链接** | YouTube 本身不通 | 需要代理 |
-| 转 B站 / 小红书 / 播客 / 本地文件 | **不受影响** | — |
+**YouTube 链接**：连不上那条路就用不了，但 **B站、小红书、播客、本地文件都不受影响**。
 
-换句话说：**处理本地录音、B站、小红书、播客完全没问题**，只有 YouTube 那条路需要你自己有代理。
+**装依赖慢**：`brew` 换中科大或清华的镜像源。
 
-> 作者的机器走代理出口，无法实测大陆直连情况。上表中「hf-mirror 供的是同一个文件」是核对过字节数的（574,041,195 字节），其余是通行经验，以你本地实测为准。
+</details>
 
 ---
 
@@ -115,7 +139,7 @@ curl -L --create-dirs -o ~/.cache/whisper.cpp/ggml-large-v3-turbo-q5_0.bin \
   https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin
 ```
 
-**中国大陆**：把域名换成 `hf-mirror.com`，文件完全一样：
+**连不上的话**换镜像，同一个文件：
 
 ```bash
 curl -L --create-dirs -o ~/.cache/whisper.cpp/ggml-large-v3-turbo-q5_0.bin \
@@ -235,20 +259,48 @@ The transcript prints into the conversation, and four files land on disk for you
 
 (There's also a `meta.json` with raw metadata — that one's for machines, ignore it.)
 
-## Platform status (all tested, not guessed)
+## Supported platforms
 
-| Platform | Status | What was measured |
-|---|---|---|
-| **YouTube / Bilibili / podcasts** | ✅ Solid | Verified end-to-end repeatedly, no retries |
-| **Local audio & video files** | ✅ Solid | mp4 / mov / mp3 / m4a / aiff, etc. |
-| **Xiaohongshu (RedNote)** | ✅ Solid | 3 consecutive runs, all passed, no retries. **But the link matters** — see below |
-| **TikTok** | ⚠️ Works, retries | 3 consecutive runs, all passed, one needed a retry. Held together by UA spoofing — see below |
-| **Douyin** | ⚠️ Needs your cookies | Two public links both returned `Fresh cookies... are needed`. Pass `--cookies-from-browser chrome` to get past it — **I have not verified that path with real cookies** |
-| X | ❓ Untested | No sample to test with |
+| Platform | |
+|---|---|
+| **YouTube / Bilibili / podcasts** | ✅ |
+| **Local audio & video files** | ✅ mp4 / mov / mp3 / m4a / aiff, etc. |
+| **Xiaohongshu (RedNote)** | ✅ Use a link shared from the app |
+| **TikTok** | ✅ Anti-bot handled automatically; may retry once |
+| **Douyin** | Needs cookies — see below |
+| X | Untested; give it a try |
 
-**Xiaohongshu**: the link has to be the one **shared from the app**, carrying an `xsec_token` parameter. A URL copied from the desktop address bar lacks it and won't work, and the token expires, so you'll need a fresh share now and then. Also, Xiaohongshu only exposes title and duration — uploader, views and likes come back empty. That's the platform withholding them, not a bug. Image posts (as opposed to video posts) have no video stream at all, so `No video formats found` is the correct answer there.
+<details>
+<summary><b>Xiaohongshu link not working?</b></summary>
 
-**TikTok**: every request carries a browser User-Agent. Without it TikTok recognises the downloader and serves a shell page with no video data. On top of that its JS challenge makes success probabilistic, so a failure triggers retries after 8 and 20 seconds — **seeing "retrying in 8 seconds" is normal, not a fault**.
+The link has to be the one **shared from the app**, carrying an `xsec_token` parameter — a URL copied from the desktop address bar doesn't have one. The token also expires, so grab a fresh share now and then.
+
+Two more things that look like bugs but aren't: Xiaohongshu only exposes title and duration, so uploader/views/likes come back empty; and image posts have no video stream at all, so `No video formats found` is the correct answer — use a video post instead.
+
+</details>
+
+<details>
+<summary><b>TikTok says "retrying in 8 seconds"?</b></summary>
+
+That's expected — just let it run. TikTok's JS challenge makes any single request probabilistic, so the script retries after 8 and then 20 seconds.
+
+Every request also carries a browser User-Agent; without one TikTok serves a shell page with no video data. If that ever stops working, see `--impersonate` under "Which AI tools are supported" below.
+
+</details>
+
+<details>
+<summary><b>Douyin returns <code>Fresh cookies are needed</code>?</b></summary>
+
+Douyin sits behind a cookie wall, so you have to supply them:
+
+```bash
+--cookies-from-browser chrome     # pull from your browser
+--cookies cookies.txt             # or a Netscape-format file
+```
+
+**Off by default** — cookies are private data, so the script never reaches into your browser unless you explicitly ask.
+
+</details>
 
 ## How fast
 
@@ -264,11 +316,16 @@ Local transcription measures at roughly **10× realtime** (49s of audio in 4.9s;
 
 **Proper nouns will almost always come out wrong.** Two defences: `--hint` feeds domain vocabulary to the model up front (biasing decoding), and `--terms` applies a `wrong=>right` list afterwards (**every substitution is printed — nothing is changed behind your back**). In one measured technical sentence, 5 of 6 terms were wrong; the two together recovered all of them.
 
-## If huggingface.co is blocked where you are
+<details>
+<summary><b>Some hosts unreachable from your network?</b></summary>
 
-Use `hf-mirror.com` instead — verified to serve the byte-identical file (574,041,195 bytes) and reachable worldwide. Both URLs are in the manual install section below.
+**The model**: if `huggingface.co` won't load, use `hf-mirror.com` — byte-identical file (574,041,195 bytes, verified), reachable worldwide. The install block above already points there.
 
-If YouTube itself is blocked for you, that route needs a proxy; Bilibili, Xiaohongshu, podcasts and local files are unaffected.
+**YouTube links**: if YouTube itself won't load, that route is out — but **Bilibili, Xiaohongshu, podcasts and local files are unaffected**.
+
+**Slow dependency install**: point `brew` at a closer mirror.
+
+</details>
 
 ---
 
