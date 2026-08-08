@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地词表（领域专用，不进仓库；example-zh.txt 是示范，要提交）
+terms/default-zh.txt
+
+# 跑出来的产物
+*.srt
+*.mp3
+*.mp4
+*.wav
