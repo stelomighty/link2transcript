@@ -14,7 +14,7 @@
 帮我装 link2transcript 这个 skill：
 1. 从 GitHub 装 stelomighty/link2transcript
 2. 读它的 README.md，按「自己动手装」一节把三个依赖和模型装好
-3. 我在中国大陆，模型用 hf-mirror 那个地址（不在大陆的把这句删掉）
+3. 模型从 hf-mirror.com 那个地址下（全球都连得上），下不动再换官方地址
 4. 装完随便找条视频链接跑一遍，确认能出文字稿再告诉我
 ```
 
