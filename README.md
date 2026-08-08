@@ -17,7 +17,7 @@
 1. 从 GitHub 装 stelomighty/link2transcript
 2. 读它的 README.md，按「自己动手装」一节把三个依赖和模型装好
 3. 模型从 hf-mirror.com 那个地址下（全球都连得上），下不动再换官方地址
-4. 装完随便找条视频链接跑一遍，确认能出文字稿再告诉我
+4. 装完自检一下：用 say 命令生成一段测试语音，跑一遍看能不能出文字稿，然后告诉我结果
 ```
 
 它会逐条问你要不要执行命令，点同意就行。**全程五到十分钟**，绝大部分时间花在下那个 547MB 的模型上。
@@ -198,7 +198,8 @@ Please install the link2transcript skill for me:
    dependencies and the model
 3. Pull the model from the hf-mirror.com URL (reachable worldwide); fall back to the
    official one if that stalls
-4. When you're done, run it once on any video link and confirm you get a transcript
+4. When you're done, verify it: generate a short test clip with the `say` command,
+   run that through, and tell me whether a transcript came out
 ```
 
 It will ask before running each command — just approve. **Five to ten minutes total**, almost all of it spent downloading the 547MB model.
